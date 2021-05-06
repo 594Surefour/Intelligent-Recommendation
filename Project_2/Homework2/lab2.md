@@ -46,17 +46,19 @@
 
 #### 1.5 总结
 
-### 2.[代码](###2、代码详解)
+### [2.TF- IDF](###2、TF-IDF)
 
-#### 对训练集进行建模
+#### 2.1 TF
 
-### 3.[结果分析及准确率](###3、结果分析及准确率)
+#### 2.2 IDF
 
-#### 对测试集数据进行分析
+#### 2.3 TF-IDF实质
 
-#### 准确率分析
+#### 2.4 应用
 
-#### 误差分析
+#### 2.5 缺点
+
+### 3.[代码](###3、代码详解)
 
 ### 4.[提交文件](###4、提交文件列表)
 
@@ -126,296 +128,364 @@ CB应该算是第一代的个性化应用中最流行的推荐算法了。但由
 
 <div style="page-break-after:always"></div>
 
-### 2、代码详解
+### 2、TF-IDF
 
-##### 2.1导入必要的函数库
+ 	TF-IDF（term frequency–inverse document frequency，词频-逆向文件频率）是一种用于信息检索（information retrieval）与文本挖掘（text mining）的常用加权技术。
 
-```python
-#导入必要的函数库
-import numpy
-import random
-import pandas as pd
-import math
-from sklearn.model_selection import train_test_split
-from sklearn import datasets
-from collections import defaultdict
-```
+   TF-IDF是一种统计方法，用以评估一字词对于一个文件集或一个语料库中的其中一份文件的重要程度。字词的重要性随着它在文件中出现的次数成正比增加，但同时会随着它在语料库中出现的频率成反比下降。
 
-##### 2.2读取并查看训练集数据
+   TF-IDF的主要思想是：如果某个单词在一篇文章中出现的频率TF高，并且在其他文章中很少出现，则认为此词或者短语具有很好的类别区分能力，适合用来分类。
 
-```python
-#训练集
-train_news_path = r"./train/train_news.tsv"
-train_history_path = r"./train/train.tsv"
+#### 2.1.TF——词频(Term Frequency)
 
-train_history = pd.read_csv(train_history_path, sep='\t',header=0)
+词频（TF）表示词条（关键字）在文本中出现的频率。这个数字通常会被归一化(一般是词频除以文章总词数), 以防止它偏向长的文件。
 
-train_news = pd.read_csv(train_news_path, sep='\t',header=0)
-```
+<img src="lab2.assets/截屏2021-05-05 下午10.23.20.png" alt="截屏2021-05-05 下午10.23.20" style="zoom:50%;" />
 
-```python
-#测试集
+其中 **ni,j** 是该词在文件 **dj** 中出现的次数，分母则是文件 dj 中所有词汇出现的次数总和；
 
+#### 2.2.IDF——逆向文件频率（Inverse Document Frequency）
 
-```
+ 逆向文件频率 (IDF) ：某一特定词语的IDF，可以由总文件数目除以包含该词语的文件的数目**，**再将得到的商取对数得到。如果包含词条t的文档越少, IDF越大，则说明词条具有很好的类别区分能力。
 
-##### 2.3新闻归类
+<img src="lab2.assets/截屏2021-05-05 下午10.24.11.png" alt="截屏2021-05-05 下午10.24.11" style="zoom:33%;" />
 
-```python
-#将新闻按照Category归类，归类后存入new_dateset
-n = open(train_news_path,"rt",encoding="utf-8")
-header = n.readline()
-header = header.strip().split('\t')#列名
-print(header)
+其中，｜D| **是语料库中的文件总数**。 |{j:ti∈dj}| 表示包含词语 ti 的文件数目（即 ni,j≠0 的文件数目）。如果该词语不在语料库中，就会导致分母为零，因此一般情况下使用 1+|{j:ti∈dj}|
 
-news_dataset = []
+<img src="lab2.assets/截屏2021-05-05 下午10.24.42.png" alt="截屏2021-05-05 下午10.24.42" style="zoom:33%;" />
 
-for line in n:
-    fields = line.strip().split('\t')
-    d = dict(zip(header, fields))
-    news_dataset.append(d)
-   
-News_Category = defaultdict(set)
+#### 2.3.TF-IDF实际上是：TF * IDF
 
-for d in news_dataset:
-    nid, category = d['Nid'],d["Category"]
-    News_Category[category].add(nid)
-```
+某一特定文件内的高词语频率，以及该词语在整个文件集合中的低文件频率，可以产生出高权重的TF-IDF。因此，TF-IDF倾向于过滤掉常见的词语，保留重要的词语。
 
-##### 2.4用户历史浏览记录
+<img src="lab2.assets/截屏2021-05-05 下午10.25.04.png" alt="截屏2021-05-05 下午10.25.04" style="zoom:33%;" />
 
-```python
-u = open(train_history_path,"rt",encoding="utf-8")
-header2 = u.readline()
-header2 = header2.strip().split('\t')#列名
-print(header2)
+#### 2.4.应用
 
-users_dataset = []
+（1）搜索引擎；（2）关键词提取；（3）文本相似性；（4）文本摘要
 
-for line in u:
-    fields2 = line.strip().split('\t')
-    u = dict(zip(header2, fields2))
-    users_dataset.append(u)
+#### 2.5.缺点
 
-User_list = defaultdict(set)
+TF-IDF 采用文本逆频率 IDF 对 TF 值加权取权值大的作为关键词，但 IDF 的简单结构并不能有效地反映单词的重要程度和特征词的分布情况，使其无法很好地完成对权值调整的功能，所以 TF-IDF 算法的精度并不是很高，尤其是当文本集已经分类的情况下。
 
-for d in users_dataset:
-    uid, history  = d["Uid"],d['History']
-    User_list[uid].add(history)
-```
+在本质上 IDF 是一种试图抑制噪音的加权，并且单纯地认为文本频率小的单词就越重要，文本频率大的单词就越无用。这对于大部分文本信息，并不是完全正确的。IDF 的简单结构并不能使提取的关键词， 十分有效地反映单词的重要程度和特征词的分布情 况，使其无法很好地完成对权值调整的功能。尤其是在同类语料库中，这一方法有很大弊端，往往一些同类文本的关键词被盖。
 
-##### 2.5数据分析
+TF-IDF算法实现简单快速，但是仍有许多不足之处：
 
-```python
-UserPerItem = defaultdict(set)	#记录对某商品评价过的用户
-ItemPerUser = defaultdict(set)	#记录某用户评价过的商品
-#把训练集数据由dataset读入上述字典中
-for d in dataset:
-    user,item = d['user_id'], d['business_id']
-    UserPerItem[item].add(user)#评价过某商品的用户列表，key值为business_id
-    ItemPerUser[user].add(item)#某用户评价过的商品列表，key值为用户名user_id
-```
+（1）没有考虑特征词的位置因素对文本的区分度，词条出现在文档的不同位置时，对区分度的贡献大小是不一样的。
 
-##### 2.6相似度函数
+（2）按照传统TF-IDF，往往一些生僻词的IDF(反文档频率)会比较高、因此这些生僻词常会被误认为是文档关键词。
 
-```python
-#余弦相似度
-def cos(s1,s2):
-    demon = 0.0
-    number = len(s1.intersection(s2))#并集
-    l1 = len(s1) #s1集合中元素个数
-    l2 = len(s2) #s2集合中元素个数
-    demon += math.sqrt(l1 * l2)
-    if demon == 0:
-        return 0
-    return number / demon
-```
+（3）传统TF-IDF中的IDF部分只考虑了特征词与它出现的文本数之间的关系，而忽略了特征项在一个类别中不同的类别间的分布情况。
 
-##### 2.7预测函数
-
-```python
-reviewsPerUser = defaultdict(list)
-reviewsPerItem = defaultdict(list)
-
-for d in dataset:
-    user,item = d['user_id'], d['business_id']
-    reviewsPerItem[item].append(d)
-    reviewsPerUser[user].append(d)
-
-def prdictRating(user,item):
-    ratings = []
-    similarities = []
-    for d in reviewsPerUser[user]:
-        i2 = d['business_id']
-        if i2 == item:continue
-        ratings.append(d['stars'])
-        similarities.append(cos(UserPerItem[item],UserPerItem[i2]))
-    if(sum(similarities)>0):
-        weightedRatings = [(x*y) for x,y in zip(ratings,similarities)]
-        return sum(weightedRatings) / sum(similarities)
-    else:
-        return ratingMean
-```
-
+（4）对于文档中出现次数较少的重要人名、地名信息提取效果不佳。
 
 
 <div style="page-break-after:always"></div>
 
-### 3、结果分析及准确率
+### 3、代码详解
 
-##### 3.1读取测试集数据预测并写回
+##### 3.1导入必要的函数库
 
 ```python
-#读取测试集数据
-filename2 = "test.csv"
-f2 = open(filename2, "rt", encoding="utf-8")
-header2 = f2.readline()
-header2 = header2.strip().split(',')#列名
-print(header2)
-header2.append('pre_stars')
-print(header2)
-
-predata = []
-
-for line in f2:
-    fields = line.strip().split(',')
-    d = dict(zip(header2, fields))
-    d["pre_stars"] = 0
-    predata.append(d)
-
-for d in predata:
-    u, i = d['user_id'], d['business_id']
-    s = round(prdictRating(u,i))
-    d['pre_stars'] = s
-
-df = pd.DataFrame(predata)
-df.to_csv(filename2)
+import pandas as pd
+import numpy as np
+import csv
 ```
 
-##### 3.2对训练集进行预测并查看准确率
+##### 3.2导入tsv文件
 
 ```python
-s = len(dataset)
-count = 0
-for d in dataset:
-    user,item,star = d['user_id'], d['business_id'], d['stars']
-    star = float(star)
-    p = round(prdictRating(user,item))
-    if p - star <= 0.5:
-        count += 1
-print(count/s)
+#定义一个读取tsv文件的函数
+def read_from_tsv(file_path: str, column_names: list) -> list:
+    csv.register_dialect('tsv_dialect', delimiter='\t', quoting=csv.QUOTE_ALL)
+    with open(file_path, "r",encoding='utf-8') as wf:
+        reader = csv.DictReader(wf, fieldnames=column_names, dialect='tsv_dialect')
+        datas = []
+        for row in reader:
+            data = dict(row)
+            datas.append(data)
+    csv.unregister_dialect('tsv_dialect')
+    return datas
 ```
 
-结果如下：
-
-<img src="/Users/lee/Study/大三-下/智能推荐系统/Project_1/lab1.assets/截屏2021-03-31 下午10.47.53.png" alt="截屏2021-03-31 下午10.47.53" style="zoom:67%;" />
-
-##### 3.3计算误差
-
 ```python
-
+#读取训练集和测试集
+train_data = read_from_tsv('train.tsv',['Uid','Date', 'History', 'Impression'])[1:]
+train_news_data = read_from_tsv('train_news.tsv',['Nid','Category', 'SubCategory', 'Title', 'Abstract'])[1:]
+test_data = read_from_tsv('test.tsv',['Uid','Date', 'History', 'Impression'])[1:]
+test_news_data = read_from_tsv('test_news.tsv',['Nid','Category', 'SubCategory', 'Title', 'Abstract'])[1:]
 ```
 
-结果如下：
-
-
-
-
-
-##### 3.4预测某商品时通过考虑商品热度进行衰减
+```python
+#合并数据
+data = train_data + test_data
+news_data = train_news_data + test_news_data
+```
 
 ```python
-def prdictRating(user,item):
-    c = len(UserPerItem[item])#计算有多少个用户评价过该商品
-    c = 1 / (1 + math.log(c,10))
-    ratings = []
-    similarities = []
-    for d in reviewsPerUser[user]:
-        i2 = d['business_id']
-        if i2 == item:continue
-        ratings.append(d['stars'])
-        similarities.append(cos(UserPerItem[item],UserPerItem[i2]) * c)
-    if(sum(similarities)>0):
-        weightedRatings = [(x*y) for x,y in zip(ratings,similarities)]
-        return sum(weightedRatings) / sum(similarities)
+#随机查看合并训练的数据
+train_data[:2]
+train_news_data[:2]
+test_data[:2]
+test_news_data[:2]
+```
+
+
+
+##### 以下是生成基于内容的DNN模型
+
+##### 3.3生成数据
+
+```python
+# feature
+# 每一个feature实际上是其各种浏览内容的几个部分组成：
+#1.最关注的3个Category 
+#2.Abstract与Title进行词过滤后最热的n个词汇，并进行word emdbedding
+
+# 生成类别集合，方便下面数据转换
+news_Category_set = []
+for i in train_news_data:
+    news_Category_set.append(i['Category'])
+for i in test_news_data:
+    news_Category_set.append(i['Category'])
+news_Category_set = list(set(news_Category_set))
+news_Category_set 
+```
+
+```python
+#生成feature1，Category
+feature_c_m = []
+for i in train_data[:200]:
+    m = []#中介容器,每一个数据清空一次
+    for j in i['History'].split(' '):
+        for h in range(len(news_data)):
+            if j == news_data[h]['Nid'].strip(' '):
+                j = news_data[h]['Category']
+            else:
+                pass
+        m.append(news_Category_set.index(j))
+    feature_c_m.append(m)
+```
+
+```python
+# 筛选出出现最高的三个类型
+def select_3(arr):
+    result = {}
+    for i in set(arr):
+        result[i] = arr.count(i)
+    d_order=sorted(result.items(),key=lambda x:x[1],reverse=False)
+    if len(d_order)>=3:
+        a =  [d_order[-3][0],d_order[-2][0],d_order[-1][0]]
     else:
-        return ratingMean
+        a = [100,100,100]
+    return a
 ```
 
 ```python
-#导入新测试集数据并预测
-#读取测试集数据
-filename2 = "test2.csv"
-f2 = open(filename2, "rt", encoding="utf-8")
-header2 = f2.readline()
-header2 = header2.strip().split(',')#列名
-#print(header2)
-header2.append('pre_stars')
-#print(header2)
-
-predata = []
-
-for line in f2:
-    fields = line.strip().split(',')
-    d = dict(zip(header2, fields))
-    d["pre_stars"] = 0
-    predata.append(d)
-
-for d in predata:
-    u, i = d['user_id'], d['business_id']
-    s = round(prdictRating(u,i))
-    d['pre_stars'] = s
-
-df = pd.DataFrame(predata)
-df.to_csv(filename2)
+feature_c = []
+for i in feature_c_m:
+    feature_c.append(select_3(i))
 ```
-
-
-
-##### 3.5对比test.csv和test2.csv
 
 ```python
-filename_1 = "test.csv"
-filename_2 = "test2.csv"
-
-file1 = open(filename_1, "rt", encoding="utf-8")
-file2 = open(filename_2, "rt", encoding="utf-8")
-
-headers1 = file1.readline()
-headers1 = headers1.strip().split(',')#列名
-headers2 = file2.readline()
-headers2 = headers2.strip().split(',')#列名
-
-data1 = []
-data2 = []
-
-for line in file1:
-    fields = line.strip().split(',')
-    d = dict(zip(headers1, fields))
-    data1.append(d)
-
-for line in file2:
-    fields = line.strip().split(',')
-    d = dict(zip(headers2, fields))
-    data2.append(d)
-
-s = len(data1)#总数据量
-count = 0#统计评分相等的个数
-for i in range(len(data1)):
-    s1 = float(data1[i]['pre_stars'])
-    s2 = float(data2[i]['pre_stars'])
-    if(s1 == s2):
-        count += 1
-print(count / s)
+#生成feature2，词嵌入
+feature_w_m = []
+for i in data[:200]:
+    m = ''#中介容器,每一个数据清空一次
+    for j in i['History'].split(' '):
+        for h in range(len(news_data)):
+            if j == news_data[h]['Nid'].strip(' '):
+                a = news_data[h]['Abstract']
+                b = news_data[h]['Title']
+            else:
+                pass
+        m = a+b
+    feature_w_m.append(m)
 ```
 
-<img src="/Users/lee/Study/大三-下/智能推荐系统/Project_1/lab1.assets/截屏2021-04-03 上午11.17.24.png" alt="截屏2021-04-03 上午11.17.24" style="zoom:50%;" />
+```python
+from gensim.models import word2vec
+import gensim
+import jieba
+import jieba.analyse
+words_ls = []
+for i in feature_w_m:
+    words = jieba.analyse.extract_tags(i, topK=5)
+    words_ls.append(words)
+#model = word2vec.Word2Vec(words_ls,size=12,window=2,min_count=1)
+#model.save('moxing.model')
+model = gensim.models.Word2Vec.load('moxing.model')
+```
+
+##### 3.4搭建模型
+
+```python
+network = models.Sequential()
+network.add(layers.Dense(16, activation='relu'))
+network.add(layers.Dense(8))
+network.add(layers.Dense(1))
+network.build(input_shape=(None,63))
+optimizer = tf.keras.optimizers.RMSprop(0.01)
+network.compile(loss='mse',
+                optimizer=optimizer,
+                metrics=['mae', 'mse'])  # 指定评价指标为准备率
+# 模型训练
+network.summary()
+```
+
+<img src="lab2.assets/截屏2021-05-05 下午10.36.02.png" alt="截屏2021-05-05 下午10.36.02" style="zoom:50%;" />
+
+```python
+# 模型装配
+network.fit(db_train, nb_epoch=10)
+network.save('my_model.h5')
+```
+
+<img src="lab2.assets/截屏2021-05-05 下午10.41.52.png" alt="截屏2021-05-05 下午10.41.52" style="zoom:50%;" />
+
+##### 3.5模型应用
+
+```python
+len(test_data)#2000
+
+n = 5
+count=0
+ls = []
+for i in range(n):
+    count+=len(test_data[i]['Impression'].split(' '))
+    ls.append(len(test_data[i]['Impression'].split(' ')))
+
+count	#142
+
+ls  #[38, 20, 12, 5, 67]
+```
+
+```python
+#生成feature1，Category
+feature_c_m = []
+for i in test_data[:count]:
+    m = []#中介容器,每一个数据清空一次
+    for j in i['History'].split(' '):
+        for h in range(len(news_data)):
+            if j == news_data[h]['Nid'].strip(' '):
+                j = news_data[h]['Category']
+            else:
+                pass
+        m.append(news_Category_set.index(j))
+    feature_c_m.append(m)
+
+feature_c = []
+for i in feature_c_m:
+    feature_c.append(select_3(i))
+
+#生成feature2，词嵌入
+feature_w_m = []
+for i in test_data[:count]:
+    m = ''#中介容器,每一个数据清空一次
+    for j in i['History'].split(' '):
+        for h in range(len(news_data)):
+            if j == news_data[h]['Nid'].strip(' '):
+                a = news_data[h]['Abstract']
+                b = news_data[h]['Title']
+            else:
+                pass
+        m = a+b
+    feature_w_m.append(m)
+    
+for i in feature_w_m:
+    words = jieba.analyse.extract_tags(i, topK=5)
+    words_ls.append(words)
+feature_w = []
+
+for m in words_ls[0:len(train_data[:count])]:
+    mid3 = []
+    mid3.append(model.wv[m[0]].tolist())
+    mid3.append(model.wv[m[1]].tolist())
+    mid3.append(model.wv[m[2]].tolist())
+    mid3.append(model.wv[m[3]].tolist())
+    mid3.append(model.wv[m[4]].tolist())
+    feature_w.append(np.array(mid3).reshape(60).tolist())
+
+# 生成label，并产生与之对应的feature
+feature_m = []
+label_m = []
+for i in train_data[:count]:
+    #print(train_data.index(i))
+    feature_mm = feature_c[train_data.index(i)] + list(feature_w[train_data.index(i)])
+    for j in i['Impression'].split(' '):
+        feature_m.append(np.array(feature_mm))
+        label_m.append(int(j[-1]))
+
+x_test, y_test = get_tensor(feature_m, label_m)
+```
+
+```python
+def p(x):
+    y = tf.convert_to_tensor(x)
+    z = tf.cast(y,dtype=tf.float32)
+    return z
+
+def panduan(x):
+    if x>0.5:
+        x=1
+    else:
+        x=0
+    return x
+
+result = []
+for i in range(142):
+    result.append(panduan(network.predict(p([x_test[i]]))))
+```
+
+```python
+n = 0
+appends = []
+for i in ls:
+    appends.append(result[n:n+i])
+    n = n + i
+appends
+```
+
+```python
+def ls2str(ls):
+    m = ''
+    for i in ls:
+        m+=i
+    return m
+new_data = []
+columns = []
+for i in range(len(appends)):
+    a = test_data[i]
+    a['test'] = ls2str(appends[i])
+    new_data[].append(a) 
+    columns.append(i)
+```
+
+##### 3.6写回test.tsv文件
+
+```python
+def write_to_tsv(output_path: str, file_columns: list, data: list):
+    csv.register_dialect('tsv_dialect', delimiter='\t', quoting=csv.QUOTE_ALL)
+    with open(output_path, "w", newline="") as wf:
+        writer = csv.DictWriter(wf, fieldnames=file_columns, dialect='tsv_dialect')
+        writer.writerows(data)
+    csv.unregister_dialect('tsv_dialect')
+```
+
+```python
+write_to_tsv('result.tsv',columns,new_data)
+```
+
+
 
 ### 4、提交文件列表
 
 实验报告lab2-10185102142-李泽浩
 
-源代码source_code.ipynb
+源代码CODE.ipynb
 
-预测结果后的test.tsv
+写回预测结果后的test.tsv
+
+模型
 
