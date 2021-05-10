@@ -62,11 +62,11 @@
 
 ### 4.[提交文件](###4、提交文件列表)
 
-#### 4.1实验报告PDF
+#### 实验报告PDF
 
-#### 4.2Python代码 source_code.ipynb
+#### Python代码 CODE.ipynb
 
-#### 4.3预测补充后的test.tsv文件
+#### 预测补充后的test.tsv文件
 
 <div style="page-break-after: always;"></div>
 
@@ -378,7 +378,9 @@ for i in test_data[:count]:
 feature_c = []
 for i in feature_c_m:
     feature_c.append(select_3(i))
+```
 
+```python
 #生成feature2，词嵌入
 feature_w_m = []
 for i in test_data[:count]:
@@ -397,7 +399,11 @@ for i in feature_w_m:
     words = jieba.analyse.extract_tags(i, topK=5)
     words_ls.append(words)
 feature_w = []
+```
 
+
+
+```python
 for m in words_ls[0:len(train_data[:count])]:
     mid3 = []
     mid3.append(model.wv[m[0]].tolist())
@@ -406,7 +412,9 @@ for m in words_ls[0:len(train_data[:count])]:
     mid3.append(model.wv[m[3]].tolist())
     mid3.append(model.wv[m[4]].tolist())
     feature_w.append(np.array(mid3).reshape(60).tolist())
+```
 
+```python
 # 生成label，并产生与之对应的feature
 feature_m = []
 label_m = []
@@ -476,6 +484,28 @@ def write_to_tsv(output_path: str, file_columns: list, data: list):
 ```python
 write_to_tsv('result.tsv',columns,new_data)
 ```
+
+##### 3.7打印查看结果
+
+```python
+p = pd.read_csv('test2.csv', sep='\t', header=0, usecols=[4])
+for j in range(0,2000):
+    pre_list = p.loc[j]
+    pre_list[0] = pre_list[0].replace('[','')
+    pre_list[0] = pre_list[0].replace(']','')
+    print("-----------------------")
+    print(j)
+    nums_list = []
+    
+    for i in range(0,len(pre_list[0].split(","))):
+        num = float(pre_list[0].split(",")[i])
+        num = format(num,'.5f')
+        nums_list.append(num)
+        #print(num)
+    print(nums_list)
+```
+
+<img src="lab2.assets/截屏2021-05-06 下午5.28.29.png" alt="截屏2021-05-06 下午5.28.29" style="zoom:50%;" />
 
 
 
