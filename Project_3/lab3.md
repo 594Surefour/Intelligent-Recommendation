@@ -56,11 +56,11 @@
 
 ### 3.[结果分析及准确率](####3、结果分析及准确率)
 
-#### 
+
 
 ### 4.[问题总结](####4、问题总结)
 
-#### 
+ 
 
 ### 5.[提交文件](####5、提交文件列表)
 
@@ -495,23 +495,7 @@ for r in [1, 2, 3, 5, 10, 20]:
 
 ### 3、结果分析及准确率
 
-##### 3.1对训练集进行预测并查看准确率
-
-```python
-s = len(dataset)
-count = 0
-for d in dataset:
-    user,item,star = d['user_id'], d['business_id'], d['stars']
-    star = float(star)
-    p = round(prdictRating(user,item))
-    if p - star <= 0.5:
-        count += 1
-print(count/s)
-```
-
-
-
-##### 3.2计算均方误差
+##### 计算均方误差
 
 ```python
 #均方误差函数
@@ -532,52 +516,7 @@ MSE(cfPredicitions, labels)
 
 结果如下：
 
-
-
-
-
-```python
-
-```
-
-
-
-##### 4.5对比test.csv和test2.csv
-
-```python
-filename_1 = "test.csv"
-filename_2 = "test2.csv"
-
-file1 = open(filename_1, "rt", encoding="utf-8")
-file2 = open(filename_2, "rt", encoding="utf-8")
-
-headers1 = file1.readline()
-headers1 = headers1.strip().split(',')#列名
-headers2 = file2.readline()
-headers2 = headers2.strip().split(',')#列名
-
-data1 = []
-data2 = []
-
-for line in file1:
-    fields = line.strip().split(',')
-    d = dict(zip(headers1, fields))
-    data1.append(d)
-
-for line in file2:
-    fields = line.strip().split(',')
-    d = dict(zip(headers2, fields))
-    data2.append(d)
-
-s = len(data1)#总数据量
-count = 0#统计评分相等的个数
-for i in range(len(data1)):
-    s1 = float(data1[i]['pre_stars'])
-    s2 = float(data2[i]['pre_stars'])
-    if(s1 == s2):
-        count += 1
-print(count / s)
-```
+<img src="lab3.assets/截屏2021-05-19 下午8.11.28.png" alt="截屏2021-05-19 下午8.11.28" style="zoom:33%;" />
 
 
 
