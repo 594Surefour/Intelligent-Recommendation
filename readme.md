@@ -2,7 +2,7 @@
 
 ### 【1】Project1_**Memory-based CF for Rating Prediction**
 
-
+https://github.com/594Surefour/Intelligent-Recommendation/tree/master/Project_1
 
 ### 【2】Project2_**Content-based Recommendation**
 
